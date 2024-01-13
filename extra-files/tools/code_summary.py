@@ -101,7 +101,7 @@ class CodeSummary:
             capture_output=True,
             text=True).stdout.strip().split('\n')
         code_commit_date = datetime.fromisoformat(
-            code_commit_log[0]).astimezone(ZoneInfo('Asia/Shanghai')).isoformat()
+            code_commit_log[0]).astimezone(ZoneInfo('Asia/Jakarta')).isoformat()
         code_commit_hash = code_commit_log[1][:7]
         code_ref = code_commit_log[2].replace(' ', '').split(',')
 
@@ -145,7 +145,7 @@ class CodeSummary:
         )
 
     def get_build_date(self):
-        return datetime.now(ZoneInfo('Asia/Shanghai')).replace(microsecond=0).isoformat()
+        return datetime.now(ZoneInfo('Asia/Jakarta')).replace(microsecond=0).isoformat()
 
     def get_login_info(self):
         username, password_id = self.__login_user()
