@@ -5,78 +5,25 @@
 #
 # <https://github.com/hugcabbage/shared-lede>
 #
-# The firmware code comes from x-wrt
-#
-name: build x-wrt
+name: build multi devices
 
 on:
   workflow_dispatch:
     inputs:
-      model:
-        description: '选择设备'
-        required: true
-        type: choice
-        options:
-          - 'qihoo-c301'
-          - 'phicomm-k3'
-          - 'tenda-ac9'
-          - 'h3c-magic-nx30-pro'
-          - 'qihoo-360t7'
-          - 'xiaomi-wr30u-112m-nmbm'
-          - 'xiaomi-wr30u-stock'
-          - 'xiaomi-wr30u-ubootmod'
-          - 'xiaomi-ax6000-stock'
-          - 'xiaomi-ax6000-ubootmod'
-          - 'redmi-ax6s'
-          - 'miwifi-mini'
-          - 'glinet-mt1300'
-          - 'hiwifi-hc5962'
-          - 'phicomm-k2p'
-          - 'xiaomi-3g'
-          - 'xiaomi-3g-v2'
-          - 'xiaomi-3-pro'
-          - 'xiaomi-4'
-          - 'xiaomi-4a-gigabit'
-          - 'xiaomi-4a-gigabit-v2'
-          - 'xiaomi-ac2100'
-          - 'xiaomi-cr6606'
-          - 'xiaomi-cr6608'
-          - 'xiaomi-cr6609'
-          - 'redmi-ac2100'
-          - 'youhua-wr1200js'
-          - 'glinet-mt300n-v2'
-          - 'glinet-microuter-n300'
-          - 'xiaomi-4a-100m'
-          - 'xiaomi-4c'
-          - 'miwifi-3c'
-          - 'miwifi-nano'
-      latest_tag:
-        description: '切换到最近稳定版本'
-        required: false
-        type: boolean
-      lan_ipad:
-        description: '设置LAN口IP地址(会覆盖modify脚本中的设置)'
-        required: false
-        default: ''
-        type: string
-      login_pwd:
-        description: '设置初始登陆密码(会覆盖modify脚本中的设置)'
-        required: false
-        default: ''
-        type: string
       record:
-        description: '输入版本描述'     
+        description: 'input version description'
         required: false
-        default: '升级内容：内核升级，更新应用版本'
+        default: 'details: kernel bumped, application version updated'
         type: string
       release:
-        description: '上传到release'
+        description: 'upload firmware to release'
         required: false
         default: true
         type: boolean
       artifact:
-        description: '上传到artifact'
+        description: 'upload firmware to artifact'
         required: false
+        default: false
         type: boolean
 
 permissions:
@@ -100,27 +47,22 @@ jobs:
           path: ${{ env.EXTRA_STR }}
 
       - name: Prepare environments
-        env:
-          REQUIREMENTS: ${{ env.EXTRA_STR }}/extra-files/requirements-transit.txt
         run: |
           sudo apt-get update
           sudo apt-get -y install gcc-multilib gettext
           sudo apt-get clean
-          pip3 install -r $REQUIREMENTS
 
       - name: Prepare deployment
         id: prepare-deployment
         env:
-          MODEL_NAME: ${{ inputs.model }}
-          LATEST_TAG: ${{ inputs.latest_tag }}
-          LOGIN_IP: ${{ inputs.lan_ipad }}
-          LOGIN_PWD: ${{ inputs.login_pwd }}
-          TEMP_PREFIX: ${{ env.EXTRA_STR }}
-          DEPLOY_DIR: ${{ env.EXTRA_STR }}/preset-x-wrt
-          TRANSIT_PY: ${{ env.EXTRA_STR }}/extra-files/transit.py
+          DEPLOY_DIR: ${{ env.EXTRA_STR }}/preset-openwrt
         run: |
-          chmod +x $TRANSIT_PY
-          $TRANSIT_PY
+          CLONE_SH=$DEPLOY_DIR/1.clone.sh
+          echo "modelname=${GITHUB_WORKFLOW#* }" >> "$GITHUB_OUTPUT"
+          echo "codedir=$(grep '^CODE_DIR=' $CLONE_SH | cut -d '=' -f 2)" >> "$GITHUB_OUTPUT"
+          echo "clone_sh=$CLONE_SH" >> "$GITHUB_OUTPUT"
+          echo "modify_sh=$DEPLOY_DIR/1.modify.sh" >> "$GITHUB_OUTPUT"
+          echo "dot_config=$DEPLOY_DIR/multi.config" >> "$GITHUB_OUTPUT"
 
       - name: Clone sources
         env:
@@ -171,7 +113,7 @@ jobs:
         continue-on-error: true
         id: generate-summary
         env:
-          MODEL_NAME: ${{ inputs.model }}
+          MODEL_NAME: ${{ steps.prepare-deployment.outputs.modelname }}
           CODE_DIR: ${{ steps.prepare-deployment.outputs.codedir }}
           TRANSIT_PY: ${{ env.EXTRA_STR }}/extra-files/transit.py
         run: |
