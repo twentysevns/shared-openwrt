@@ -1,171 +1,171 @@
-# 使用 GitHub Actions 快速定制编译 OpenWrt 固件
+# Use GitHub Actions to quickly customize and compile OpenWrt firmware
 
-流程文档参考[KFERMercer/OpenWrt-CI](https://github.com/KFERMercer/OpenWrt-CI)，十分感谢！
+For process documentation, please refer to [KFERMercer/OpenWrt-CI](https://github.com/KFERMercer/OpenWrt-CI). Thank you very much!
 
-使用的固件源码包括openwrt官方，以及coolsnowwolf、Lienol、immortalwrt、x-wrt维护的版本，详见[表格](#固件源码)。
+The firmware source code used includes the official openwrt, as well as versions maintained by coolsnowwolf, Lienol, immortalwrt, and x-wrt. For details, see [Table] (#firmwaresourcecode).
 
-预置机型有小米4A千兆版、小米CR6606、红米AX6S等，详见`preset*/headers.json`。
+Preset models include Xiaomi 4A Gigabit Edition, Xiaomi CR6606, Redmi AX6S, etc. For details, see `preset*/headers.json`.
 
-**快速生成固件 ---> 登陆GitHub，fork此仓库，点击上方`Actions`，选择左侧流程中的`build XXX`运行，运行完毕即可下载固件。示意如下：**
+**Quickly generate firmware ---> Log in to GitHub, fork this warehouse, click on `Actions` above, select `build XXX` in the process on the left to run, and download the firmware after running. The indication is as follows: **
 
 <img src="extra-files/images/action_running.gif" width="70%" ></img>
 
-选择机型：在run workflow界面点开`选择设备`的下拉框，即可手动选择机型。
+Select the model: Click on the drop-down box of `Select Device` in the run workflow interface to manually select the model.
 
-如预置机型中没有你需要的，可以使用[templet](templet)目录下的文件新增机型。
+If there is no preset model that you need, you can use the file in the [templet] (templet) directory to add a new model.
 
-喜欢的话，右上角Star一下，方便再找。
+If you like it, star it in the upper right corner so you can find it again easily.
 
-## 使用本项目你需要
+## To use this project you need
 
-- GitHub 账号
+- GitHub account
 
-- GitHub Actions 基本使用技能
+- Basic skills for using GitHub Actions
 
-**Liunx、OpenWrt、[Actions](https://docs.github.com/cn/actions)等相关知识，可自行搜索学习**
+**Liunx, OpenWrt, [Actions](https://docs.github.com/cn/actions) and other related knowledge, you can search and learn by yourself**
 
-## 使用教程
+## Tutorial
 
 <details>
   
-  <summary>点击展开/关闭</summary>
+   <summary>Click to expand/close</summary>
 
-### 1. 注册GitHub账号并开启GitHub Actions
+### 1. Register a GitHub account and enable GitHub Actions
 
 ### 2. fork [hugcabbage/shared-lede](https://github.com/hugcabbage/shared-lede)
 
-### 3. 自定义固件
+### 3. Custom firmware
 
-什么也不修改，按默认配置，可以跳过此步。
+Do not modify anything. According to the default configuration, you can skip this step.
 
-每个机型关联三个文件，在preset*目录中。
+Each model is associated with three files in the preset* directory.
 
-- [数字].clone.sh
+-[number].clone.sh
 
-此脚本用来拉取固件源码和扩展插件源码，新增插件源时，建议先在本地测试下是否缺依赖。
+This script is used to pull the firmware source code and extension plug-in source code. When adding plug-in sources, it is recommended to test locally whether there are any missing dependencies.
 
-常用的克隆命令如下（克隆理解为下载即可）：
+Commonly used cloning commands are as follows (clone can be understood as downloading):
 
-`git clone 链接`
+`git clone link`
 
-`git clone -b 分支名 链接`
+`git clone -b branch name link`
 
-- [数字].modify.sh
+-[number].modify.sh
 
-此脚本用于固件初始化设置，修改登录IP、主机名、WiFi名称等。
+This script is used to initialize the firmware settings and modify the login IP, host name, WiFi name, etc.
 
-此脚本用到最多的命令是sed，详细用法参见[链接](https://www.runoob.com/linux/linux-comm-sed.html)，这里只简单说明。
+The most commonly used command in this script is sed. For detailed usage, please refer to [link](https://www.runoob.com/linux/linux-comm-sed.html). Here is a brief explanation.
 
-比如，下面这条命令就是用来修改管理IP的：
+For example, the following command is used to modify the management IP:
 
 `sed -i 's/192.168.1.1/192.168.31.1/g' package/base-files/files/bin/config_generate`
 
-`192.168.1.1`是源码中默认的lan口登录IP，也即初始的；`192.168.31.1`是新的，用来替换初始文本的。
+`192.168.1.1` is the default lan port login IP in the source code, which is the initial one; `192.168.31.1` is new and is used to replace the initial text.
 
-可以看出命令的构成是这样的：
+It can be seen that the composition of the command is as follows:
 
-`sed -i 's/原字符串/新字符串/g' 文件路径`
+`sed -i 's/original string/new string/g' file path`
 
-这就可以用来替换掉源码中的特定位置，-i指直接改动文件，s指替换，g指全局。
+This can be used to replace specific locations in the source code. -i refers to changing the file directly, s refers to replacement, and g refers to global.
 
-原字符串记为str1，新字符串记为str2，自定义设置改动str2位置即可，如果你改动了str1，那么命令在源码中就匹配不到东西了，替换也就无效了。
+The original string is recorded as str1, and the new string is recorded as str2. Just change the position of str2 in the custom settings. If you change str1, the command will not match anything in the source code, and the replacement will be invalid.
 
->🎈🎈🎈 各基础命令的用法可参考该[链接](https://github.com/danshui-git/shuoming/blob/master/ming.md)，适合新手查阅。
+>🎈🎈🎈 For the usage of each basic command, please refer to this [link](https://github.com/danshui-git/shuoming/blob/master/ming.md), which is suitable for novices.
 
-- [数字].config
+-[number].config
 
-该文件对应本地编译执行make menuconfig后生成的.config文件。
+This file corresponds to the .config file generated after local compilation and execution of make menuconfig.
 
-该文件主要包含luci应用，流程中会自动转为完整的.config。
+This file mainly contains the luci application and will be automatically converted into a complete .config during the process.
 
-增减插件修改这个文件即可，以argon主题为例，格式如下：
+Just add or delete plug-ins to modify this file. Taking the argon theme as an example, the format is as follows:
 
- `CONFIG_PACKAGE_luci-theme-argon=y`   选中编译进固件的是这种
+  `CONFIG_PACKAGE_luci-theme-argon=y` is selected to be compiled into the firmware.
 
- `CONFIG_PACKAGE_luci-theme-argon=m`   选中仅编译ipk插件是这种
+  `CONFIG_PACKAGE_luci-theme-argon=m` is selected to only compile the ipk plug-in.
 
- `# CONFIG_PACKAGE_luci-theme-argon is not set`  未选中是这种
+  `# CONFIG_PACKAGE_luci-theme-argon is not set` This is the case if it is not selected
 
-### 4. Actions中手动开始编译流程
+### 4. Manually start the compilation process in Actions
 
-选择你需要的`build XXX`workflow，再点击`Run workflow`，按需填内容，运行即可。
+Select the `build XXX` workflow you need, then click `Run workflow`, fill in the content as required, and run it.
 
-各选项说明如下:
+Each option is described below:
 
-- 超频到1100Mhz:
+- Overclocked to 1100Mhz:
 
-仅`build lede`有此选项。
+Only `build lede` has this option.
 
-默认不勾选。仅适用于5.10内核，除红米AX6S外，其余机型默认皆为5.10内核。
+Not checked by default. It is only applicable to the 5.10 kernel. Except for the Redmi AX6S, all other models use the 5.10 kernel by default.
 
-- 使用5.15内核:
+- Using 5.15 kernel:
 
-仅`build lede`有此选项。
+Only `build lede` has this option.
 
-默认不勾选。lean lede源码勾选此项时，编译小米4A千兆版和小米3Gv2时会报错，勿用。
+Not checked by default. When lean lede source code checks this option, an error will be reported when compiling Xiaomi 4A Gigabit Edition and Xiaomi 3Gv2, so do not use it.
 
-红米AX6S只有5.15内核，不必勾选。
+Redmi AX6S only has 5.15 core, so there is no need to check it.
 
-- 选择机型:
+- Select model:
 
-点开下拉框，可以选择不同的机型。
+Click the drop-down box to select different models.
 
-- 上传到release:
+- Upload to release:
 
-默认勾选。单文件不能超过2GB，可添加内容记录。 release区见下图：
+Checked by default. A single file cannot exceed 2GB, and content records can be added. See the figure below for the release area:
 
 <img src="extra-files/images/release_zone.png" width="70%" ></img>
 
-- 上传到artifact:
+- Upload to artifact:
 
-默认不勾选。artifact区见下图：
+Not checked by default. See the figure below for the artifact area:
 
 <img src="extra-files/images/artifact_zone.png" width="70%" ></img>
 
-- 版本描述:
+- Version description:
 
-可作一些简单记录，会在release中显示。
+You can make some simple records and they will be displayed in the release.
 
-### 5. 编译完成
+### 5. Compilation completed
 
-Actions流程顺利完成后，去release(或者artifact)下载你的固件，release中allfiles.zip是所有文件的打包。
+After the Actions process is successfully completed, go to release (or artifact) to download your firmware. Allfiles.zip in release is the package of all files.
 
 </details>
 
-## preset*目录说明
+## preset*directory description
 
 <details>
   
-  <summary>点击展开/关闭</summary>
+   <summary>Click to expand/close</summary>
 
-全部机型信息可查看文件`preset*/headers.json`，各配置目录略有不同，如[preset-openwrt/headers.json](preset-openwrt/headers.json)。
+All model information can be found in the file `preset*/headers.json`. Each configuration directory is slightly different, such as [preset-openwrt/headers.json](preset-openwrt/headers.json).
 
-### config说明
-- 1.config用于小闪存设备（16MB及以下）
-- 2.config用于大闪存设备
+### config description
+- 1.config for small flash devices (16MB and below)
+- 2.config for large flash devices
 
-### 标号规则
-- headers.json中每个机型的数字标号，用于选择对应的clone.sh、modify.sh、config。
-- 按headers.json中的机型标号，找不到对应的clone.sh、modify.sh、config时，默认选择1.clone.sh、1.modify.sh、1.config。
+### Labeling rules
+- The numerical label of each model in headers.json is used to select the corresponding clone.sh, modify.sh, and config.
+- According to the model number in headers.json, if the corresponding clone.sh, modify.sh, and config cannot be found, 1.clone.sh, 1.modify.sh, and 1.config will be selected by default.
 
-### 自定义配置
-#### 方法一
-修改clone.sh、modify.sh、config三个文件
+### Custom configuration
+#### method one
+Modify the three files clone.sh, modify.sh, and config
 
-#### 方法二
-- 添加新的clone.sh、modify.sh、config，并用数字标号，比如5.clone.sh、5.modify.sh、5.config
-- 修改headers.json指定机型的标号，比如把`"xiaomi-ac2100": ["1", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]`改成`"xiaomi-ac2100": ["5", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]`
+#### Method Two
+- Add new clone.sh, modify.sh, and config and label them with numbers, such as 5.clone.sh, 5.modify.sh, 5.config
+- Modify the label of the specified model in headers.json, for example, change `"xiaomi-ac2100": ["1", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]` to `"xiaomi-ac2100" : ["5", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]`
 
-#### 方法三
-- 添加新的clone.sh、modify.sh、config，并用数字标号，比如5.clone.sh、5.modify.sh、5.config
-- 向headers.json添加新机型，比如添加`"xiaomi-ac2100-xxx": ["5", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]`
-- 向`.github/workflows/build-xxx.yml`inputs.model.options添加新机型，比如向.github/workflows/build-openwrt.yml添加`- 'xiaomi-ac2100-xxx'`
+#### Method 3
+- Add new clone.sh, modify.sh, and config and label them with numbers, such as 5.clone.sh, 5.modify.sh, 5.config
+- Add new models to headers.json, for example, add `"xiaomi-ac2100-xxx": ["5", "ramips", "mt7621", "xiaomi_mi-router-ac2100"]`
+- Add new models to `.github/workflows/build-xxx.yml`inputs.model.options, for example, add `- 'xiaomi-ac2100-xxx'` to .github/workflows/build-openwrt.yml
 
 </details>
 
-## 固件源码
+## Firmware source code
 
-|配置目录|流程名|源码|
+|Configuration directory|Process name|Source code|
 |:----:|:----:|:----:|
 |preset-lede|build lede|[coolsnowwolf/lede](https://github.com/coolsnowwolf/lede)|
 |preset-lienol-openwrt|build lienol openwrt|[Lienol/openwrt](https://github.com/Lienol/openwrt)|
@@ -173,20 +173,20 @@ Actions流程顺利完成后，去release(或者artifact)下载你的固件，re
 |preset-immortalwrt|build immortalwrt|[immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt)|
 |preset-x-wrt|build x-wrt|[x-wrt/x-wrt](https://github.com/x-wrt/x-wrt)|
 
-## 提示
+## hint
 
-1. 直接在Actions中运行`build XXX`就能编译出固件，但默认插件数量较少，对插件有增、减需要的，可修改`preset*/[数字].config`。若在`[数字].clone.sh`中添加了插件源，在`[数字].config`要作对应修改，建议先在本地make menuconfig测试。
+1. Run `build XXX` directly in Actions to compile the firmware, but the default number of plug-ins is small. If you need to add or delete plug-ins, you can modify `preset*/[number].config`. If the plug-in source is added to `[Number].clone.sh` and corresponding modifications need to be made in `[Number].config`, it is recommended to test it by making menuconfig locally first.
 
-1. 超频方案默认不启用，方案来自该[帖子](https://www.right.com.cn/forum/thread-4042045-1-1.html)。
+1. The overclocking solution is not enabled by default, and the solution comes from this [post](https://www.right.com.cn/forum/thread-4042045-1-1.html).
 
-1. 小米4A千兆版和小米3Gv2需修改分区才能在breed直刷，参考该[帖子](https://www.right.com.cn/forum/thread-4052254-1-1.html)，本项目中已修改好，见脚本[modify-xiaomi-router-4a-3g-v2.sh](extra-files/modify-xiaomi-router-4a-3g-v2.sh)。
+1. Xiaomi 4A Gigabit Edition and Xiaomi 3Gv2 need to modify the partition to directly flash in breed. Please refer to this [post](https://www.right.com.cn/forum/thread-4052254-1-1.html), It has been modified in this project, see the script [modify-xiaomi-router-4a-3g-v2.sh](extra-files/modify-xiaomi-router-4a-3g-v2.sh).
 
-1. 小米4A千兆版和小米3Gv2闪存小(仅16MB)，若编译插件太多，包体积超出闪存上限，则不会生成sysupgrade.bin。
+1. Xiaomi 4A Gigabit Edition and Xiaomi 3Gv2 have small flash memory (only 16MB). If too many plug-ins are compiled and the package size exceeds the upper limit of the flash memory, sysupgrade.bin will not be generated.
 
 ---
 
-## 最后
+## at last
 
-无特别详细的教程，自己摸索吧。
+There are no particularly detailed tutorials, just figure it out on your own.
 
-如有问题，请利用庞大的网络知识库，能快速解决你的问题。
+If you have any questions, please use the huge network knowledge base to quickly solve your problems.
